@@ -1,4 +1,4 @@
-import json
+import json, sequtils
 import ../domain/models
 import logutils
 
@@ -16,7 +16,7 @@ type
     data*: string         # stringifyされたJSON（=何でも送信可能
 
 var
-  players: seq[Player]
+  players {.threadvar.}: seq[Player]
   board: Board
 
 proc find(players: seq[Player], player: Player): int =
@@ -52,5 +52,8 @@ proc calc * (key: string, dataStr: string): seq[LogicResponce] =
     discard
 
 
+proc getAnswers * (): seq[Player] =
+  players.filterIt(it.isAnswer)
 
-
+proc getNotAnswers * (): seq[Player] =
+  players.filterIt(not it.isAnswer)
