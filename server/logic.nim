@@ -60,7 +60,9 @@ proc calc * (key: string, dataStr: string): seq[LogicResponce] =
     ]
 
   of acChangeAnsOrder:
-    discard
+    board.ansOrder = data["ansOrder"].elems.mapIt(it.getStr)
+    return @[LogicResponce(dst: sdAll, kind: asBoardUpdate, data: $(%(board)))]
+
   of acOpenT1:
     discard
   of acOpenT2:
