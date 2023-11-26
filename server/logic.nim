@@ -1,4 +1,4 @@
-import json, sequtils
+import json, sequtils, tables
 import ../domain/models
 import logutils
 
@@ -50,8 +50,8 @@ proc calc * (key: string, dataStr: string): seq[LogicResponce] =
       ans = data["ans"].getStr
     current_ans_id.inc
     if idx != -1:
-      board.ans[current_ans_id] = ans
-      players[idx].ansId.add(current_ans_id)
+      board.ans[$current_ans_id] = ans
+      players[idx].ansId.add($current_ans_id)
     else:
       raise newException(ValueError, "acAddAns: player data is not valid")
     return @[
