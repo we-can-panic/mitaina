@@ -1,4 +1,4 @@
-import tables
+import tables, json
 
 #[
   ## 共通ワード
@@ -23,20 +23,20 @@ import tables
 
 type
   Player* = object # プレイヤーオブジェクト
-    id* : string     # id (= ws.key)
-    name*: string    # 任意の文字列
-    isAnswer*: bool  # お題回答者か否か
-    ansId*: seq[int] # 出した回答のID
-    point*: int      # ポイント
+    id* : string        # id (= ws.key)
+    name*: string       # 任意の文字列
+    isAnswer*: bool     # お題回答者か否か
+    ansId*: seq[string] # 出した回答のID
+    point*: int         # ポイント
 
   Theme* = object
     word*: string
     hidden*: bool = true
 
   Board* = object # 盤面オブジェクト
-    t1*, t2*: Theme        # お題のワード
-    ans: Table[int, string] # 回答IDと回答
-    ansOrder: seq[int]      # 回答者に見せる順番
+    t1*, t2*: Theme                                           # お題のワード
+    ans*: Table[string, string] = initTable[string, string]() # 回答IDと回答
+    ansOrder*: seq[string]                                    # 回答者に見せる順番
 
   GameStatus* = enum # Front用のステップ
     gsWait     # ユーザが集まるまで待機

@@ -18,6 +18,7 @@ type
 var
   players {.threadvar.}: seq[Player]
   board: Board
+  current_ans_id = 0
 
 proc find(players: seq[Player], player: Player): int =
   for i, p in players:
@@ -31,7 +32,7 @@ proc calc * (key: string, dataStr: string): seq[LogicResponce] =
   case data["kind"].to(ApiFromClient):
   of acPlayerUpdate:
     let
-      player = data["user"].to(Player)
+      player = data["player"].to(Player)
       idx = players.find(player)
     if idx == -1:
       players.add(player)
@@ -43,7 +44,21 @@ proc calc * (key: string, dataStr: string): seq[LogicResponce] =
     return @[LogicResponce(dst: sdAll, kind: asPlayerUpdate, data: $(%(players)))]
 
   of acAddAns:
-    discard
+    let
+      player = data["player"].to(Player)
+      idx = players.find(player)
+      ans = data["ans"].getStr
+    current_ans_id.inc
+    if idx != -1:
+      board.ans[current_ans_id] = ans
+      players[idx].ansId.add(current_ans_id)
+    else:
+      raise newException(ValueError, "acAddAns: player data is not valid")
+    return @[
+      LogicResponce(dst: sdAll, kind: asBoardUpdate, data: $(%(board))),
+      LogicResponce(dst: sdAll, kind: asPlayerUpdate, data: $(%(players)))
+    ]
+
   of acChangeAnsOrder:
     discard
   of acOpenT1:
