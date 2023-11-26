@@ -17,8 +17,8 @@ type
 
 var
   players {.threadvar.}: seq[Player]
-  board: Board
-  current_ans_id = 0
+  board {.threadvar.}: Board
+  current_ans_id {.threadvar.}: int
 
 proc find(players: seq[Player], player: Player): int =
   for i, p in players:

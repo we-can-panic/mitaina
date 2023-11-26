@@ -1,5 +1,5 @@
 include karax/prelude
-import json
+import json, dom, strformat
 import ../domain/models
 import lib/simpleWs
 
@@ -10,7 +10,7 @@ var
   state: GameStatus = gsWait
 
 proc onRecv(ev: MessageEvent) =
-  let data = parseJson(ev.data)
+  let data = parseJson($ev.data)
   case data["kind"].to(ApiFromServer):
   of asTellYourId:
     me = data["data"].getStr
@@ -33,11 +33,11 @@ proc makeLogin(): VNode =
     tdiv(id="login-parameter"):
       tdiv(id="login-parameter-name"):
         label:
-          text: "name"
+          text "name"
         input(id="login-parameter-name-input", `type`="text")
       tdiv(id="login-parameter-pass"):
         label:
-          text: "passcode"
+          text "passcode"
         input(id="login-parameter-pass-input", `type`="number")
     tdiv(id="login-button"):
       button():
@@ -45,8 +45,8 @@ proc makeLogin(): VNode =
         proc onClick() =
           # make me
           let
-            name = $document.getElementById("login-parameter-name-input").value
-            num = $document.getElementById("login-parameter-pass-input").value
+            name = $getElementById("login-parameter-name-input").value
+            num = $getElementById("login-parameter-pass-input").value
 
           if name == "" or num == "":
             window.alert("nameかpassを入力してください!")
@@ -65,7 +65,7 @@ proc makeWait(): VNode =
       tdiv(id=fmt"wait-playerinfo-{i}"):
         tdiv(id="wait-playerinfo-{i}-icon"):
           tdiv(class="player-icon"):
-            text p.name[0]
+            text $p.name[0]
         tdiv(id="wait-playerinfo-{i}-name"):
           text p.name
     
@@ -88,13 +88,11 @@ proc main(): VNode =
     of gsWait:
       makeWait()
 
-    of gsWaitForQ:
+    of gsWriteA:
       discard
-    of gsWriteQ:
+    of gsSortA:
       discard
-    of gsSortQ:
-      discard
-    of gsDisplayQ:
+    of gsDisplayA:
       discard
     of gsPoint:
       discard
