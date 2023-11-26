@@ -64,9 +64,12 @@ proc calc * (key: string, dataStr: string): seq[LogicResponce] =
     return @[LogicResponce(dst: sdAll, kind: asBoardUpdate, data: $(%(board)))]
 
   of acOpenT1:
-    discard
+    board.t1.hidden = false
+    return @[LogicResponce(dst: sdAll, kind: asBoardUpdate, data: $(%(board)))]
+
   of acOpenT2:
-    discard
+    board.t2.hidden = false
+    return @[LogicResponce(dst: sdAll, kind: asBoardUpdate, data: $(%(board)))]
 
 
 proc getAnswers * (): seq[Player] =
