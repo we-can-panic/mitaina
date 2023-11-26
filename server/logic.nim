@@ -31,9 +31,9 @@ proc calc * (key: string, dataStr: string): seq[LogicResponce] =
 
   case data["kind"].to(ApiFromClient):
   of acPlayerUpdate:
-    let
-      player = data["player"].to(Player)
-      idx = players.find(player)
+    var player = data["player"].to(Player)
+    player.id = key
+    let idx = players.find(player)
     if idx == -1:
       players.add(player)
     else:
