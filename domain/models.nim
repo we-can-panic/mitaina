@@ -39,20 +39,22 @@ type
     ansOrder*: seq[string]                                    # 回答者に見せる順番
 
   GameStatus* = enum # Front用のステップ
+    gsLogin    # 最初のログイン画面
     gsWait     # ユーザが集まるまで待機
-    gsWaitForT # お題が出るまで待機
     gsWriteA   # 答えを記入
     gsSortA    # 答えの順番を並び替え
     gsDisplayA # 答えを提示
     gsPoint    # ポイント計算
 
   ApiFromServer* = enum # サーバからのAPI
+    asTellYourId
     asStatusUpdate # statusのupdate
     asPlayerUpdate
     asBoardUpdate
 
   ApiFromClient* = enum # クライアントからのAPI
     acPlayerUpdate   # playerのUpdate（自分一人しかいじらない
+    acGameStart      # ゲーム開始
     acAddAns         # 回答の登録
     acChangeAnsOrder # ansorderの変更
     acOpenT1         # お題の回答

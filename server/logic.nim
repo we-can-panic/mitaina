@@ -1,4 +1,4 @@
-import json, sequtils, tables
+import json, sequtils, tables, random
 import ../domain/models
 import logutils
 
@@ -41,7 +41,27 @@ proc calc * (key: string, dataStr: string): seq[LogicResponce] =
       players[idx].isAnswer = player.isAnswer
       players[idx].ansId = player.ansId
       players[idx].point = player.point
-    return @[LogicResponce(dst: sdAll, kind: asPlayerUpdate, data: $(%(players)))]
+    return @[
+      LogicResponce(dst: sdYou, kind: asTellYourId, data: key),
+      LogicResponce(dst: sdAll, kind: asPlayerUpdate, data: $(%(players)))
+    ]
+
+  of acGameStart:
+    # お題回答者決め
+    var rnd = initRand()
+    let parent_idx = rnd.rand(0..<players.len)
+    for i, _ in players:
+      players[i].isAnswer = i == parent_idx
+    # お題決め
+    var themes = parseFile("themas.json").elems.mapIt(it.getStr)
+    themes.shuffle
+    board.t1.word = themes[0]
+    board.t2.word = themes[1]
+    return @[
+      LogicResponce(dst: sdAll, kind: asPlayerUpdate, data: $(%players)),
+      LogicResponce(dst: sdAll, kind: asBoardUpdate, data: $(%board)),
+      LogicResponce(dst: sdAll, kind: asStatusUpdate, data: $gsWriteA)
+    ]
 
   of acAddAns:
     let
