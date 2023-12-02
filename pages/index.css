@@ -1,0 +1,14 @@
+.columns {
+  display: flex;
+  flex-direction: column; /* div B 要素を縦に配置する */
+}
+
+.column {
+  display: flex;
+}
+
+.column-inner {
+  width: 50px; /* 必要に応じて調整してください */
+  height: 50px; /* 必要に応じて調整してください */
+  margin: 5px; /* 適切な間隔を設定してください */
+}

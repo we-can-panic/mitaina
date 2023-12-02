@@ -11,6 +11,7 @@ var
 
 proc onRecv(ev: MessageEvent) =
   let data = parseJson($ev.data)
+  echo data
   case data["kind"].to(ApiFromServer):
   of asTellYourId:
     me = data["data"].getStr
@@ -20,6 +21,7 @@ proc onRecv(ev: MessageEvent) =
     state = data["data"].to(GameStatus)
   of asBoardUpdate:
     board = data["data"].to(Board)
+  redraw()
 
 #--
 
@@ -40,7 +42,7 @@ proc makeLogin(): VNode =
           text "passcode"
         input(id="login-parameter-pass-input", `type`="number")
     tdiv(id="login-button"):
-      button():
+      button(class="button"):
         text "Enter"
         proc onClick() =
           # make me
@@ -62,14 +64,15 @@ proc makeLogin(): VNode =
 
 proc makeWait(): VNode =
   buildHtml tdiv:
-    for i, p in players:
-      tdiv(id=fmt"wait-playerinfo-{i}"):
-        tdiv(id="wait-playerinfo-{i}-icon"):
-          tdiv(class="player-icon"):
-            text $p.name[0]
-        tdiv(id="wait-playerinfo-{i}-name"):
-          text p.name
-    
+    tdiv(id="wait-playerinfo", class="columns"):
+      for i, p in players:
+        tdiv(id=fmt"wait-playerinfo-{i}", class="column"):
+          tdiv(id=fmt"wait-playerinfo-{i}-icon", class="column-inner"):
+            tdiv(class="player-icon"):
+              text $p.name[0]
+          tdiv(id=fmt"wait-playerinfo-{i}-name", class="column-inner"):
+            text p.name
+
     tdiv(id="wait-start-button"):
       button():
         text "Start"
