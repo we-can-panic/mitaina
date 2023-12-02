@@ -1,4 +1,5 @@
 # import logging
+import strutils
 
 type
   LogDestination* = enum
@@ -19,6 +20,6 @@ proc log * (text: varargs[string, `$`]) {.gcsafe.}=
   case internalLogger.dst:
   of ldFile:
     let f = open(internalLogger.file, fmAppend)
-    f.write(text)
+    f.write(text.join(""))
   of ldConsole:
-    echo text
+    echo text.join("")

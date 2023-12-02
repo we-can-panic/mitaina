@@ -7,7 +7,7 @@ var
   players: seq[Player]
   me: string
   board: Board
-  state: GameStatus = gsWait
+  state: GameStatus = gsLogin
 
 proc onRecv(ev: MessageEvent) =
   let data = parseJson($ev.data)
@@ -50,11 +50,12 @@ proc makeLogin(): VNode =
 
           if name == "" or num == "":
             window.alert("nameかpassを入力してください!")
+            return
 
           # regist
           wsSend($(%* {
             "kind": $acPlayerUpdate,
-            "data": $(%Player(name: name))
+            "player": Player(name: name)
           }))
           # update param
           state = gsWait

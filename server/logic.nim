@@ -13,7 +13,7 @@ type
   LogicResponce* = object
     dst*: SendDistination
     kind*: ApiFromServer
-    data*: string         # stringifyされたJSON（=何でも送信可能
+    data*: JsonNode         # 何でも送信可能
 
 var
   players {.threadvar.}: seq[Player]
@@ -42,8 +42,8 @@ proc calc * (key: string, dataStr: string): seq[LogicResponce] =
       players[idx].ansId = player.ansId
       players[idx].point = player.point
     return @[
-      LogicResponce(dst: sdYou, kind: asTellYourId, data: key),
-      LogicResponce(dst: sdAll, kind: asPlayerUpdate, data: $(%(players)))
+      LogicResponce(dst: sdYou, kind: asTellYourId, data: %key),
+      LogicResponce(dst: sdAll, kind: asPlayerUpdate, data: %(players))
     ]
 
   of acGameStart:
@@ -58,9 +58,9 @@ proc calc * (key: string, dataStr: string): seq[LogicResponce] =
     board.t1.word = themes[0]
     board.t2.word = themes[1]
     return @[
-      LogicResponce(dst: sdAll, kind: asPlayerUpdate, data: $(%players)),
-      LogicResponce(dst: sdAll, kind: asBoardUpdate, data: $(%board)),
-      LogicResponce(dst: sdAll, kind: asStatusUpdate, data: $gsWriteA)
+      LogicResponce(dst: sdAll, kind: asPlayerUpdate, data: %players),
+      LogicResponce(dst: sdAll, kind: asBoardUpdate, data: %board),
+      LogicResponce(dst: sdAll, kind: asStatusUpdate, data: %gsWriteA)
     ]
 
   of acAddAns:
@@ -75,21 +75,21 @@ proc calc * (key: string, dataStr: string): seq[LogicResponce] =
     else:
       raise newException(ValueError, "acAddAns: player data is not valid")
     return @[
-      LogicResponce(dst: sdAll, kind: asBoardUpdate, data: $(%(board))),
-      LogicResponce(dst: sdAll, kind: asPlayerUpdate, data: $(%(players)))
+      LogicResponce(dst: sdAll, kind: asBoardUpdate, data: %board),
+      LogicResponce(dst: sdAll, kind: asPlayerUpdate, data: %players)
     ]
 
   of acChangeAnsOrder:
     board.ansOrder = data["ansOrder"].elems.mapIt(it.getStr)
-    return @[LogicResponce(dst: sdAll, kind: asBoardUpdate, data: $(%(board)))]
+    return @[LogicResponce(dst: sdAll, kind: asBoardUpdate, data: %board)]
 
   of acOpenT1:
     board.t1.hidden = false
-    return @[LogicResponce(dst: sdAll, kind: asBoardUpdate, data: $(%(board)))]
+    return @[LogicResponce(dst: sdAll, kind: asBoardUpdate, data: %board)]
 
   of acOpenT2:
     board.t2.hidden = false
-    return @[LogicResponce(dst: sdAll, kind: asBoardUpdate, data: $(%(board)))]
+    return @[LogicResponce(dst: sdAll, kind: asBoardUpdate, data: %board)]
 
 
 proc getAnswers * (): seq[Player] =

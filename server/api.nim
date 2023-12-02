@@ -11,12 +11,13 @@ proc cb(req: Request) {.async, gcsafe.} =
       var ws = await newWebSocket(req)
       log "id: ", ws.key
       connections.add ws
-      await ws.send(initialMsg)
+      # await ws.send(initialMsg)
       while ws.readyState == Open:
         let packet = await ws.receiveStrPacket()
         log fmt"Received packet from {ws.key}: {packet}"
         let reslist = calc(ws.key, packet)
         for res in reslist:
+          log fmt"data: {res.data}"
           case res.dst:
           of sdAll:
             for other in connections:
