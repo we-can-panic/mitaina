@@ -53,7 +53,7 @@ proc calc * (key: string, dataStr: string): seq[LogicResponce] =
     for i, _ in players:
       players[i].isAnswer = i == parent_idx
     # お題決め
-    var themes = parseFile("themas.json").elems.mapIt(it.getStr)
+    var themes = parseFile("server/themas.json").elems.mapIt(it.getStr)
     themes.shuffle
     board.t1.word = themes[0]
     board.t2.word = themes[1]
@@ -74,10 +74,15 @@ proc calc * (key: string, dataStr: string): seq[LogicResponce] =
       players[idx].ansId.add($current_ans_id)
     else:
       raise newException(ValueError, "acAddAns: player data is not valid")
-    return @[
+    result = @[
       LogicResponce(dst: sdAll, kind: asBoardUpdate, data: %board),
       LogicResponce(dst: sdAll, kind: asPlayerUpdate, data: %players)
     ]
+    # Answer全員が答え終わっていたら次のステージに入る
+    if players.allIt(not it.isAnswer or it.ansId.len>=2):
+      result.add(LogicResponce(dst: sdAll, kind: asStatusUpdate, data: %gsSortA))
+    return result
+
 
   of acChangeAnsOrder:
     board.ansOrder = data["ansOrder"].elems.mapIt(it.getStr)

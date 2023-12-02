@@ -23,6 +23,14 @@ proc onRecv(ev: MessageEvent) =
     board = data["data"].to(Board)
   redraw()
 
+
+func find(players: seq[Player], id: string): int =
+  for i, p in players:
+    if p.id == id:
+      return i
+  return -1
+
+
 #--
 
 proc makeHeader(): VNode =
@@ -82,9 +90,50 @@ proc makeWait(): VNode =
           }))
 
 
+proc makeWriteA(): VNode =
+  buildHtml tdiv:
+    tdiv(id="writeA-answer"):
+      input(id="writeA-answer-1", `type`="text")
+      input(id="writeA-answer-2", `type`="text")
+
+    tdiv(id="writeA-send"):
+      button():
+        text "送信"
+        proc onClick() =
+          let
+            ans1 = $getElementById("writeA-answer-1").value
+            ans2 = $getElementById("writeA-answer-2").value
+          if ans1 == "" or ans2 == "":
+            window.alert("お題2つを入力してください!")
+            return
+          # regist
+          let
+            idx = players.find(me)
+          if idx == -1:
+            window.alert("プレイヤーが見つかりませんでした!")
+            return
+          wsSend($(%* {
+            "kind": $acAddAns,
+            "player": players[idx],
+            "ans": ans1
+          }))
+          wsSend($(%* {
+            "kind": $acAddAns,
+            "player": players[idx],
+            "ans": ans2
+          }))
+
+
+
+
+
+
+
+
 proc main(): VNode =
   buildHtml tdiv:
     makeHeader()
+    text $state
     case state:
     of gsLogin:
       makeLogin()
@@ -93,7 +142,8 @@ proc main(): VNode =
       makeWait()
 
     of gsWriteA:
-      discard
+      makeWriteA()
+
     of gsSortA:
       discard
     of gsDisplayA:
