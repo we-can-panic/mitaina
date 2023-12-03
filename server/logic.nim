@@ -122,6 +122,17 @@ proc calc * (key: string, dataStr: string): seq[LogicResponce] =
     if board.t1.hidden == false:
       result.add(LogicResponce(dst: sdAll, kind: asStatusUpdate, data: %gsPoint))
 
+  of acBestAnswer:
+    let idx = data["idx"].getInt
+    if idx == -1:
+      let
+        bestAnswerId = board.ansOrder[idx]
+        bestPlayer = players.filterIt(bestAnswerId in it.ansId)[0]
+        bestPlayerIdx = players.find(bestPlayer)
+      if bestPlayerIdx != -1:
+        players[bestPlayerIdx].point += 30
+    return @[LogicResponce(dst: sdAll, kind: asPlayerUpdate, data: %players)]
+
 
 proc getAnswers * (): seq[Player] =
   players.filterIt(it.isAnswer)

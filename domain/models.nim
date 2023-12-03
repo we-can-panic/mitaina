@@ -66,4 +66,5 @@ type
     acOpenAnswer     # 回答の開示
     acOpenT1         # お題の回答
     acOpenT2
+    acBestAnswer     # 一番良い答えを決定
 

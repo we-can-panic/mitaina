@@ -260,6 +260,40 @@ proc makeDisplayA(): VNode =
                     }))
 
 
+proc makePoint(): VNode =
+  let myplayer = block:
+    let idx = players.find(me)
+    players[idx]
+  buildHtml tdiv:
+    makeThema(true)
+    tdiv(id="point-answer", class="columns"):
+      for i, ansId in board.ansOrder:
+        let ans = board.ans.filterIt(it.id==ansId)[0]
+        tdiv(id=fmt"point-answer-{i}", class="column"):
+          tdiv(id=fmt"point-answer-{i}-num", class="column-inner"):
+            text $i
+          tdiv(id=fmt"point-answer-{i}-name", class="column-inner"):
+            text ans.ans
+          if not myplayer.isAnswer:
+            input(`type`="radio", id=fmt"point-answer-{i}-radio", name="point-answer-radio")
+      if not myplayer.isAnswer:
+        button():
+          text "決定"
+          proc onClick() =
+            let values = document.getElementsByName("point-answer-radio")
+            var idx = -1
+            for i, v in values:
+              if v.checked:
+                idx = i
+
+            wsSend($(%* {
+              "kind": acBestAnswer,
+              "idx": idx
+            }))
+
+
+
+
 
 proc main(): VNode =
   buildHtml tdiv:
@@ -282,7 +316,7 @@ proc main(): VNode =
       makeDisplayA()
 
     of gsPoint:
-      discard
+      makePoint()
 
 when isMainModule:
 
