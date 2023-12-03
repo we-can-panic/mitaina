@@ -33,10 +33,15 @@ type
     word*: string
     hidden*: bool = true
 
+  Answer* = object
+    ans*: string
+    id*: string
+    hidden*: bool = true
+
   Board* = object # 盤面オブジェクト
-    t1*, t2*: Theme                                           # お題のワード
-    ans*: Table[string, string] = initTable[string, string]() # 回答IDと回答
-    ansOrder*: seq[string]                                    # 回答者に見せる順番
+    t1*, t2*: Theme        # お題のワード
+    ans*: seq[Answer]      # 回答IDと回答
+    ansOrder*: seq[string] # 回答者に見せる順番
 
   GameStatus* = enum # Front用のステップ
     gsLogin    # 最初のログイン画面
@@ -57,6 +62,8 @@ type
     acGameStart      # ゲーム開始
     acAddAns         # 回答の登録
     acChangeAnsOrder # ansorderの変更
+    acStartQuestion  # 回答開始
+    acOpenAnswer     # 回答の開示
     acOpenT1         # お題の回答
     acOpenT2
 

@@ -1,4 +1,4 @@
-import json, sequtils, tables, random
+import json, sequtils, random, strformat
 import ../domain/models
 import logutils
 
@@ -25,6 +25,13 @@ proc find(players: seq[Player], player: Player): int =
     if p.id == player.id:
       return i
   return -1
+
+func find(answers: seq[Answer], id: string): int =
+  for i, a in answers:
+    if a.id == id:
+      return i
+  return -1
+
 
 proc calc * (key: string, dataStr: string): seq[LogicResponce] =
   let data = parseJson(dataStr)
@@ -55,8 +62,8 @@ proc calc * (key: string, dataStr: string): seq[LogicResponce] =
     # お題決め
     var themes = parseFile("server/themas.json").elems.mapIt(it.getStr)
     themes.shuffle
-    board.t1.word = themes[0]
-    board.t2.word = themes[1]
+    board.t1 = Theme(word: themes[0])
+    board.t2 = Theme(word: themes[1])
     return @[
       LogicResponce(dst: sdAll, kind: asPlayerUpdate, data: %players),
       LogicResponce(dst: sdAll, kind: asBoardUpdate, data: %board),
@@ -70,7 +77,8 @@ proc calc * (key: string, dataStr: string): seq[LogicResponce] =
       ans = data["ans"].getStr
     current_ans_id.inc
     if idx != -1:
-      board.ans[$current_ans_id] = ans
+      board.ans.add(Answer(ans: ans, id: $current_ans_id))
+      board.ansOrder.add($current_ans_id)
       players[idx].ansId.add($current_ans_id)
     else:
       raise newException(ValueError, "acAddAns: player data is not valid")
@@ -88,13 +96,31 @@ proc calc * (key: string, dataStr: string): seq[LogicResponce] =
     board.ansOrder = data["ansOrder"].elems.mapIt(it.getStr)
     return @[LogicResponce(dst: sdAll, kind: asBoardUpdate, data: %board)]
 
+  of acStartQuestion:
+    return @[LogicResponce(dst: sdAll, kind: asStatusUpdate, data: %gsDisplayA)]
+
+  of acOpenAnswer:
+    for id in board.ansOrder:
+      let idx = board.ans.find(id)
+      if idx == -1:
+        log fmt"board id {id} is not found"
+        continue
+      if board.ans[idx].hidden:
+        board.ans[idx].hidden = false
+        return @[LogicResponce(dst: sdAll, kind: asBoardUpdate, data: %board)]
+    return @[LogicResponce(dst: sdAll, kind: asBoardUpdate, data: %board)]
+
   of acOpenT1:
     board.t1.hidden = false
-    return @[LogicResponce(dst: sdAll, kind: asBoardUpdate, data: %board)]
+    result = @[LogicResponce(dst: sdAll, kind: asBoardUpdate, data: %board)]
+    if board.t2.hidden == false:
+      result.add(LogicResponce(dst: sdAll, kind: asStatusUpdate, data: %gsPoint))
 
   of acOpenT2:
     board.t2.hidden = false
-    return @[LogicResponce(dst: sdAll, kind: asBoardUpdate, data: %board)]
+    result = @[LogicResponce(dst: sdAll, kind: asBoardUpdate, data: %board)]
+    if board.t1.hidden == false:
+      result.add(LogicResponce(dst: sdAll, kind: asStatusUpdate, data: %gsPoint))
 
 
 proc getAnswers * (): seq[Player] =

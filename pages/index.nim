@@ -1,5 +1,5 @@
 include karax/prelude
-import json, dom, strformat
+import json, dom, strformat, sequtils
 import ../domain/models
 import lib/simpleWs
 
@@ -27,6 +27,13 @@ proc onRecv(ev: MessageEvent) =
 func find(players: seq[Player], id: string): int =
   for i, p in players:
     if p.id == id:
+      return i
+  return -1
+
+
+func find(answers: seq[Answer], id: string): int =
+  for i, a in answers:
+    if a.id == id:
       return i
   return -1
 
@@ -90,8 +97,34 @@ proc makeWait(): VNode =
           }))
 
 
-proc makeWriteA(): VNode =
+proc makeThema(displayHidden=false): VNode =
+  let
+    ans1 = block:
+      if not board.t1.hidden or displayHidden:
+        board.t1.word
+      else:
+        ""
+    ans2 = block:
+      if not board.t2.hidden or displayHidden:
+        board.t2.word
+      else:
+        ""
   buildHtml tdiv:
+    text fmt"「{ans1}」みたいな「{ans2}」"
+
+
+proc makeWriteA(): VNode =
+  let myplayer = block:
+    let idx = players.find(me)
+    players[idx]
+
+  if not myplayer.isAnswer:
+    return buildHtml tdiv:
+      text "wait for answer"
+
+  buildHtml tdiv:
+    makeThema(true)
+
     tdiv(id="writeA-answer"):
       input(id="writeA-answer-1", `type`="text")
       input(id="writeA-answer-2", `type`="text")
@@ -104,7 +137,7 @@ proc makeWriteA(): VNode =
             ans1 = $getElementById("writeA-answer-1").value
             ans2 = $getElementById("writeA-answer-2").value
           if ans1 == "" or ans2 == "":
-            window.alert("お題2つを入力してください!")
+            window.alert("回答2つを入力してください!")
             return
           # regist
           let
@@ -124,9 +157,107 @@ proc makeWriteA(): VNode =
           }))
 
 
+func makeOnClickUp(i: int): proc () =
+  proc onClick() = # i-1とiの値を入れ替え
+    if i == 0: return
+    let k = board.ansOrder[i-1]
+    board.ansOrder[i-1] = board.ansOrder[i]
+    board.ansOrder[i] = k
+    wsSend($(%* {
+      "kind": $acChangeAnsOrder,
+      "ansOrder": board.ansOrder
+    }))
+  return onClick
+
+func makeOnClickDown(i: int): proc () =
+  proc onClick() = # i+1とiの値を入れ替え
+    if i == board.ansOrder.len-1: return
+    let k = board.ansOrder[i+1]
+    board.ansOrder[i+1] = board.ansOrder[i]
+    board.ansOrder[i] = k
+    wsSend($(%* {
+      "kind": $acChangeAnsOrder,
+      "ansOrder": board.ansOrder
+    }))
+  return onClick
+
+proc makeSortA(): VNode =
+  let myplayer = block:
+    let idx = players.find(me)
+    players[idx]
+  if myplayer.isAnswer:
+    buildHtml tdiv:
+      tdiv(id="sortA-Answer", class="columns"):
+        for i, ansId in board.ansOrder:
+          tdiv(id=fmt"sortA-Answer-{i}", class="column"):
+            tdiv(id=fmt"sortA-Answer-{i}-num", class="column-inner"):
+              text $i
+            tdiv(id=fmt"sortA-Answer-{i}-name", class="column-inner"):
+              text board.ans.filterIt(it.id==ansId)[0].ans
+            tdiv(id=fmt"sortA-Answer-{i}-buttons", class="column-inner"):
+              button(onClick = makeOnClickUp(i)):
+                text "△"
+              button(onClick = makeOnClickDown(i)):
+                text "▽"
+      tdiv(id="sortA-decision"):
+        button(id="sortA-decision-button"):
+          text "OK"
+          proc onClick() =
+            wsSend($(%* {
+              "kind": $acStartQuestion
+            }))
+  else:
+    buildHtml tdiv:
+      text "wait for sort"
 
 
-
+proc makeDisplayA(): VNode =
+  let myplayer = block:
+    let idx = players.find(me)
+    players[idx]
+  buildHtml tdiv:
+    makeThema(myplayer.isAnswer) # answerであれば見せる
+    if myplayer.isAnswer:
+      button():
+        text "1つめの単語を公開"
+        proc onClick() =
+          wsSend($(%* {
+            "kind": %acOpenT1
+          }))
+      button():
+        text "2つめの単語を公開"
+        proc onClick() =
+          wsSend($(%* {
+            "kind": %acOpenT2
+          }))
+    tdiv(id="displayA-Answer", class="columns"):
+      var enableSatisfied = false
+      for i, ansId in board.ansOrder:
+        let ans = board.ans.filterIt(it.id==ansId)[0]
+        tdiv(id=fmt"displayA-Answer-{i}", class="column"):
+          tdiv(id=fmt"displayA-Answer-{i}-num", class="column-inner"):
+            text $i
+          tdiv(id=fmt"displayA-Answer-{i}-name", class="column-inner"):
+            text block:
+              if myplayer.isAnswer or not ans.hidden:
+                ans.ans
+              else:
+                ""
+          if myplayer.isAnswer:
+            tdiv(id=fmt"displayA-Answer-{i}-button", class="column-inner"):
+              let apear = block:
+                if not enableSatisfied and ans.hidden: # hiddenされている最初のcolのみ表示
+                  enableSatisfied = true
+                  true
+                else:
+                  false
+              if apear:
+                button():
+                  text "Open"
+                  proc onClick() =
+                    wsSend($(%* {
+                      "kind": acOpenAnswer
+                    }))
 
 
 
@@ -145,9 +276,11 @@ proc main(): VNode =
       makeWriteA()
 
     of gsSortA:
-      discard
+      makeSortA()
+
     of gsDisplayA:
-      discard
+      makeDisplayA()
+
     of gsPoint:
       discard
 
