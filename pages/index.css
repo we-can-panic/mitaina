@@ -1,14 +1,127 @@
-.columns {
-  display: flex;
-  flex-direction: column; /* div B 要素を縦に配置する */
+body {
+  background-color: rgba(255, 192, 203, 0.3);
 }
 
-.column {
+h1 {
   display: flex;
+  justify-content: center;
+  align-items: center;
+  /* 必要に応じて高さや幅を設定 */
+  height: 100px;
 }
 
-.column-inner {
-  width: 50px; /* 必要に応じて調整してください */
-  height: 50px; /* 必要に応じて調整してください */
-  margin: 5px; /* 適切な間隔を設定してください */
+.debug-text {
+  display: flex;
+  justify-content: center;
+  background-color: lightgrey; /* 薄いグレー */
+  margin: 0;
+}
+
+.login {
+  text-align: center;
+  max-width: 300px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+label {
+  display: block; 
+  margin: 5px;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100px;
+  padding: 8px;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+}
+
+#login-button {
+  margin: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 3px;
+  background-color: #3498db;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#login-button:hover {
+  background-color: #2980b9;
+}
+
+.player-column {
+  display: flex;
+  align-items: center;
+  margin: 10px;
+}
+
+.player-icon {
+  border-radius: 50%;
+  width: 3em;
+  height: 3em;
+  border: 8px solid #6fc4fc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f9ff;
+  font-weight: bold;
+  font-size: 1.5em;
+  z-index: 1;
+}
+
+.player-text {
+  margin-left: -5%;
+  padding-left: 2em;
+  padding-right: 1em;
+  height: 2em;
+  font-size: 1.5em;
+  border: 4px solid #6fc4fc;
+  display: flex;
+  align-items: center;
+  background-color: #f1f9ff;
+  z-index: 0;
+  transform: skewX(-20deg);
+
+}
+
+#wait-start {
+  margin: 20px;
+  display: flex;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+#wait-start-button {
+  margin: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 3px;
+  background-color: #3498db;
+  color: white;
+  cursor: pointer;
+  /* font-size: 1.5em; */
+}
+
+#wait-start-button:hover {
+  background-color: #2980b9;
+}
+
+.is-me .player-icon {
+  border: 12px solid #ff0cba;
+}
+.is-me .player-text {
+  border: 8px solid #ff0cba;
+}
+
+.waiting {
+  display: flex;
+  justify-content: center;
+  /* background-color: #2980b9; */
+  margin: 0;
 }

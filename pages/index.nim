@@ -4,10 +4,10 @@ import ../domain/models
 import lib/simpleWs
 
 var
-  players: seq[Player]
-  me: string
+  players: seq[Player] = @[Player(name: "AAAAAAAAAA"),Player(name: "BBBB", id: "bbbb", isAnswer: true)]
+  me: string = "bbbb"
   board: Board
-  state: GameStatus = gsLogin
+  state: GameStatus = gsWriteA
 
 proc onRecv(ev: MessageEvent) =
   let data = parseJson($ev.data)
@@ -46,7 +46,7 @@ proc makeHeader(): VNode =
       text "MITAINA"
 
 proc makeLogin(): VNode =
-  buildHtml tdiv:
+  buildHtml tdiv(class="login"):
     tdiv(id="login-parameter"):
       tdiv(id="login-parameter-name"):
         label:
@@ -54,10 +54,10 @@ proc makeLogin(): VNode =
         input(id="login-parameter-name-input", `type`="text")
       tdiv(id="login-parameter-pass"):
         label:
-          text "passcode"
-        input(id="login-parameter-pass-input", `type`="number")
-    tdiv(id="login-button"):
-      button(class="button"):
+          text "passwprd"
+        input(id="login-parameter-pass-input", `type`="password")
+    tdiv():
+      button(id="login-button"):
         text "Enter"
         proc onClick() =
           # make me
@@ -79,17 +79,19 @@ proc makeLogin(): VNode =
 
 proc makeWait(): VNode =
   buildHtml tdiv:
-    tdiv(id="wait-playerinfo", class="columns"):
+    tdiv(id="wait-playerinfo", class="player-columns"):
       for i, p in players:
-        tdiv(id=fmt"wait-playerinfo-{i}", class="column"):
-          tdiv(id=fmt"wait-playerinfo-{i}-icon", class="column-inner"):
-            tdiv(class="player-icon"):
-              text $p.name[0]
-          tdiv(id=fmt"wait-playerinfo-{i}-name", class="column-inner"):
+        tdiv(id=fmt"wait-playerinfo-{i}", class=block:
+          if me == p.id: "player-column is-me"
+          else: "player-column"
+          ):
+          tdiv(id=fmt"wait-playerinfo-{i}-icon", class="player-icon"):
+            text $p.name[0]
+          tdiv(id=fmt"wait-playerinfo-{i}-name", class="player-text"):
             text p.name
 
-    tdiv(id="wait-start-button"):
-      button():
+    tdiv(id="wait-start"):
+      button(id="wait-start-button"):
         text "Start"
         proc onClick() =
           wsSend($(%* {
@@ -119,8 +121,8 @@ proc makeWriteA(): VNode =
     players[idx]
 
   if not myplayer.isAnswer:
-    return buildHtml tdiv:
-      text "wait for answer"
+    return buildHtml tdiv(class="waiting"):
+      text "wait for answer..."
 
   buildHtml tdiv:
     makeThema(true)
@@ -298,7 +300,11 @@ proc makePoint(): VNode =
 proc main(): VNode =
   buildHtml tdiv:
     makeHeader()
-    text $state
+    tdiv(class="debug-text"):
+      text fmt"""
+      state: {state}
+      """
+
     case state:
     of gsLogin:
       makeLogin()
