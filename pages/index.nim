@@ -3,11 +3,16 @@ import json, dom, strformat, sequtils
 import ../domain/models
 import lib/simpleWs
 
+const debug = true
+
 var
-  players: seq[Player] = @[Player(name: "AAAAAAAAAA"),Player(name: "BBBB", id: "bbbb", isAnswer: false)]
+  players: seq[Player] = @[Player(name: "AAAAAAAAAA"),Player(name: "BBBB", id: "bbbb", isAnswer: true)]
   me: string = "bbbb"
-  board: Board
-  state: GameStatus = gsWriteA
+  board = Board(
+    t1: Theme(word: "ガソリンスタンド", hidden: true),
+    t2: Theme(word: "図書館", hidden: false)
+  )
+  state: GameStatus = gsDisplayA
 
 proc onRecv(ev: MessageEvent) =
   let data = parseJson($ev.data)
@@ -227,18 +232,21 @@ proc makeDisplayA(): VNode =
   buildHtml tdiv:
     makeThema(myplayer.isAnswer) # answerであれば見せる
     if myplayer.isAnswer:
-      button():
-        text "1つめの単語を公開"
-        proc onClick() =
-          wsSend($(%* {
-            "kind": %acOpenT1
-          }))
-      button():
-        text "2つめの単語を公開"
-        proc onClick() =
-          wsSend($(%* {
-            "kind": %acOpenT2
-          }))
+      tdiv(class="displayA-open"):
+        button(class=fmt"displayA-open-button button-{board.t1.hidden}"):
+          text "1つめの単語を公開"
+          proc onClick() =
+            wsSend($(%* {
+              "kind": %acOpenT1
+            }))
+
+        button(class=fmt"displayA-open-button button-{board.t2.hidden}"):
+          text "2つめの単語を公開"
+          proc onClick() =
+            wsSend($(%* {
+              "kind": %acOpenT2
+            }))
+
     tdiv(id="displayA-Answer", class="columns"):
       var enableSatisfied = false
       for i, ansId in board.ansOrder:
@@ -307,10 +315,12 @@ proc makePoint(): VNode =
 proc main(): VNode =
   buildHtml tdiv:
     makeHeader()
-    tdiv(class="debug-text"):
-      text fmt"""
-      state: {state}
-      """
+
+    when debug:
+      tdiv(class="debug-text"):
+        text fmt"""
+        state: {state}
+        """
 
     case state:
     of gsLogin:
