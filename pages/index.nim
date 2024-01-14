@@ -111,8 +111,11 @@ proc makeThema(displayHidden=false): VNode =
         board.t2.word
       else:
         ""
-  buildHtml tdiv:
-    text fmt"「{ans1}」みたいな「{ans2}」"
+  buildHtml tdiv(class="thema"):
+    tdiv(class="thema-title"):
+      text "お題"
+    tdiv(class="thema-text"):
+      text fmt"「{ans1}」みたいな「{ans2}」"
 
 
 proc makeWriteA(): VNode =
@@ -128,11 +131,15 @@ proc makeWriteA(): VNode =
     makeThema(true)
 
     tdiv(id="writeA-answer"):
-      input(id="writeA-answer-1", `type`="text")
-      input(id="writeA-answer-2", `type`="text")
+      tdiv(class="writeA-answer-column"):
+        label: text "回答1:"
+        textarea(id="writeA-answer-1", `type`="text", class="writeA-answer-text")
+      tdiv(class="writeA-answer-column"):
+        label: text "回答2:"
+        textarea(id="writeA-answer-2", `type`="text", class="writeA-answer-text")
 
     tdiv(id="writeA-send"):
-      button():
+      button(class="writeA-send-button"):
         text "送信"
         proc onClick() =
           let
