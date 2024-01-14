@@ -4,7 +4,7 @@ import ../domain/models
 import lib/simpleWs
 
 var
-  players: seq[Player] = @[Player(name: "AAAAAAAAAA"),Player(name: "BBBB", id: "bbbb", isAnswer: true)]
+  players: seq[Player] = @[Player(name: "AAAAAAAAAA"),Player(name: "BBBB", id: "bbbb", isAnswer: false)]
   me: string = "bbbb"
   board: Board
   state: GameStatus = gsWriteA
@@ -125,7 +125,7 @@ proc makeWriteA(): VNode =
 
   if not myplayer.isAnswer:
     return buildHtml tdiv(class="waiting"):
-      text "wait for answer..."
+      text "waiting for answer..."
 
   buildHtml tdiv:
     makeThema(true)
