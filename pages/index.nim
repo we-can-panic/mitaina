@@ -20,7 +20,7 @@ var
     ansOrder: @["4", "3", "2", "1"]
   )
   # state: GameStatus = gsWait
-  state: GameStatus = gsPoint
+  state: GameStatus = gsResult
 
 proc onRecv(ev: MessageEvent) =
   let data = parseJson($ev.data)
@@ -327,6 +327,33 @@ proc makePoint(): VNode =
             }))
 
 
+proc makeResult(): VNode =
+  buildHtml tdiv:
+    tdiv(id="result-player", class="player-columns"):
+      for i, p in players:
+        tdiv(id=fmt"result-player-{i}", class=block:
+          if me == p.id: "player-column is-me"
+          else:          "player-column"
+          ):
+          tdiv(id=fmt"result-player-{i}-icon", class="player-icon"):
+            text $p.name[0]
+          tdiv(id=fmt"result-player-{i}-name", class="player-text"):
+            text p.name
+          tdiv(class=block:
+                if me == p.id: "result-player-point is-me"
+                else:          "result-player-point"):
+            text $p.point 
+
+
+    tdiv(class="result-next"):
+      button(id="result-next-button"):
+        text "Next"
+        proc onClick() =
+          wsSend($(%* {
+            "kind": $acGameNext
+          }))
+
+
 
 
 
@@ -358,6 +385,9 @@ proc main(): VNode =
 
     of gsPoint:
       makePoint()
+
+    of gsResult:
+      makeResult()
 
 when isMainModule:
 

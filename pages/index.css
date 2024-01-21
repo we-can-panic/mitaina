@@ -76,7 +76,7 @@ input[type="password"] {
 }
 
 .player-text {
-  margin-left: -5%;
+  margin-left: -1em;
   padding-left: 2em;
   padding-right: 1em;
   height: 2em;
@@ -327,4 +327,43 @@ input[type="password"] {
 
 .point-dicision-button:hover {
   background-color: #2980b9;
+}
+
+.result-player-point {
+  margin-left: auto;
+  border-radius: 30%;
+  width: 2.5em;
+  height: 2.5em;
+  border: 4px solid #6fc4fc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f9ff;
+  font-weight: bold;
+  font-size: 1em;
+  z-index: 1;
+
+}
+
+.is-me .result-player-point{
+  border: 6px solid #0c39ff;
+}
+
+.result-next {
+  text-align: center;
+}
+
+#result-next-button {
+  margin: 10px;
+  border-radius: 20%;
+  padding: 10px 20px;
+  background-color: #f1f9ff;
+  border: 4px solid #0c39ff;
+  cursor: pointer;
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+#result-next-button:hover {
+  background-color: #6fc4fc;
 }

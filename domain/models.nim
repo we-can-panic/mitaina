@@ -50,6 +50,7 @@ type
     gsSortA    # 答えの順番を並び替え
     gsDisplayA # 答えを提示
     gsPoint    # ポイント計算
+    gsResult   # 得点表示
 
   ApiFromServer* = enum # サーバからのAPI
     asTellYourId
@@ -67,4 +68,5 @@ type
     acOpenT1         # お題の回答
     acOpenT2
     acBestAnswer     # 一番良い答えを決定
+    acGameNext
 
