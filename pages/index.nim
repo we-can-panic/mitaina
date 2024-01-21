@@ -6,12 +6,20 @@ import lib/simpleWs
 const debug = true
 
 var
-  players: seq[Player] = @[Player(name: "AAAAAAAAAA"),Player(name: "BBBB", id: "bbbb", isAnswer: true)]
+  players: seq[Player] = @[Player(name: "AAAAAAAAAA"),Player(name: "BBBB", id: "bbbb", isAnswer: false)]
   me: string = "bbbb"
   board = Board(
     t1: Theme(word: "ガソリンスタンド", hidden: false),
-    t2: Theme(word: "図書館", hidden: false)
+    t2: Theme(word: "図書館", hidden: false),
+    ans: @[
+      Answer(ans: "司書さんの声が大きい", id: "1", hidden: false),
+      Answer(ans: "赤の本、黄色の本、緑の本から自分に合うものを選んで借りる", id: "2", hidden: false),
+      Answer(ans: "返却のときに、灰皿をきれいにしてくれる", id: "3", hidden: false),
+      Answer(ans: "ドライブスルー", id: "4", hidden: false),
+    ],
+    ansOrder: @["4", "3", "2", "1"]
   )
+  # state: GameStatus = gsWait
   state: GameStatus = gsPoint
 
 proc onRecv(ev: MessageEvent) =
@@ -287,18 +295,24 @@ proc makePoint(): VNode =
     players[idx]
   buildHtml tdiv:
     makeThema(true)
-    tdiv(id="point-answer", class="columns"):
+    tdiv(class="point-answer"):
+      tdiv(class="point-answer-label"):
+        tdiv(class="point-answer-label-text"):
+          text "評価する答え"
       for i, ansId in board.ansOrder:
         let ans = board.ans.filterIt(it.id==ansId)[0]
-        tdiv(id=fmt"point-answer-{i}", class="column"):
-          tdiv(id=fmt"point-answer-{i}-num", class="column-inner"):
+        tdiv(id=fmt"point-answer-{i}", class="point-answer-column"):
+          tdiv(id=fmt"point-answer-{i}-num", class="point-answer-idx"):
             text $i
-          tdiv(id=fmt"point-answer-{i}-name", class="column-inner"):
+          tdiv(id=fmt"point-answer-{i}-name", class="point-answer-text"):
             text ans.ans
           if not myplayer.isAnswer:
-            input(`type`="radio", id=fmt"point-answer-{i}-radio", name="point-answer-radio")
+            if i==0:
+              input(`type`="radio", id=fmt"point-answer-{i}-radio", name="point-answer-radio", class="point-answer-radio", checked="")
+            else:
+              input(`type`="radio", id=fmt"point-answer-{i}-radio", name="point-answer-radio", class="point-answer-radio")
       if not myplayer.isAnswer:
-        button():
+        button(class="point-dicision-button"):
           text "決定"
           proc onClick() =
             let values = document.getElementsByName("point-answer-radio")
