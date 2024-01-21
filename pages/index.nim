@@ -9,10 +9,10 @@ var
   players: seq[Player] = @[Player(name: "AAAAAAAAAA"),Player(name: "BBBB", id: "bbbb", isAnswer: true)]
   me: string = "bbbb"
   board = Board(
-    t1: Theme(word: "ガソリンスタンド", hidden: true),
+    t1: Theme(word: "ガソリンスタンド", hidden: false),
     t2: Theme(word: "図書館", hidden: false)
   )
-  state: GameStatus = gsDisplayA
+  state: GameStatus = gsPoint
 
 proc onRecv(ev: MessageEvent) =
   let data = parseJson($ev.data)
@@ -120,7 +120,11 @@ proc makeThema(displayHidden=false): VNode =
     tdiv(class="thema-title"):
       text "お題"
     tdiv(class="thema-text"):
-      text fmt"「{ans1}」みたいな「{ans2}」"
+      text fmt"「"
+      span(class=fmt"bggray-{board.t1.hidden}"): text ans1
+      text "」みたいな「"
+      span(class=fmt"bggray-{board.t2.hidden}"): text ans2
+      text "」"
 
 
 proc makeWriteA(): VNode =

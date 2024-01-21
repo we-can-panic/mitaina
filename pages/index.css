@@ -165,6 +165,11 @@ input[type="password"] {
   background-color: rgb(255, 235, 191);
 }
 
+.bggray-true {
+  background-color: rgb(255, 212, 119);
+  color: rgba(255, 194, 79);
+}
+
 #writeA-answer {
   display: flex;
   justify-content: center;
