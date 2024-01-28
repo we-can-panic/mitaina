@@ -131,7 +131,13 @@ proc calc * (key: string, dataStr: string): seq[LogicResponce] =
         bestPlayerIdx = players.find(bestPlayer)
       if bestPlayerIdx != -1:
         players[bestPlayerIdx].point += 30
-    return @[LogicResponce(dst: sdAll, kind: asPlayerUpdate, data: %players)]
+    return @[
+      LogicResponce(dst: sdAll, kind: asPlayerUpdate, data: %players),
+      LogicResponce(dst: sdAll, kind: asStatusUpdate, data: %gsResult)
+    ]
+
+  of acGameNext:
+    return @[LogicResponce(dst: sdAll, kind: asStatusUpdate, data: %gsWait)]   
 
 
 proc getAnswers * (): seq[Player] =

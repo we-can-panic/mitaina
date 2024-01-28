@@ -3,24 +3,34 @@ import json, dom, strformat, sequtils
 import ../domain/models
 import lib/simpleWs
 
-const debug = true
+const debug = false
 
 var
-  players: seq[Player] = @[Player(name: "AAAAAAAAAA"),Player(name: "BBBB", id: "bbbb", isAnswer: false)]
-  me: string = "bbbb"
-  board = Board(
-    t1: Theme(word: "ガソリンスタンド", hidden: false),
-    t2: Theme(word: "図書館", hidden: false),
-    ans: @[
-      Answer(ans: "司書さんの声が大きい", id: "1", hidden: false),
-      Answer(ans: "赤の本、黄色の本、緑の本から自分に合うものを選んで借りる", id: "2", hidden: false),
-      Answer(ans: "返却のときに、灰皿をきれいにしてくれる", id: "3", hidden: false),
-      Answer(ans: "ドライブスルー", id: "4", hidden: false),
-    ],
-    ansOrder: @["4", "3", "2", "1"]
-  )
+  players: seq[Player] = block:
+    when debug: @[Player(name: "AAAAAAAAAA"),Player(name: "BBBB", id: "bbbb", isAnswer: false)]
+    else: @[]
+  me: string = block:
+    when debug: "bbbb"
+    else: ""
+  board = block:
+    when debug:
+      Board(
+        t1: Theme(word: "ガソリンスタンド", hidden: false),
+        t2: Theme(word: "図書館", hidden: false),
+        ans: @[
+          Answer(ans: "司書さんの声が大きい", id: "1", hidden: false),
+          Answer(ans: "赤の本、黄色の本、緑の本から自分に合うものを選んで借りる", id: "2", hidden: false),
+          Answer(ans: "返却のときに、灰皿をきれいにしてくれる", id: "3", hidden: false),
+          Answer(ans: "ドライブスルー", id: "4", hidden: false),
+        ],
+        ansOrder: @["4", "3", "2", "1"]
+      )
+    else:
+      Board()
   # state: GameStatus = gsWait
-  state: GameStatus = gsResult
+  state: GameStatus = block:
+    when debug: gsResult
+    else: gsLogin
 
 proc onRecv(ev: MessageEvent) =
   let data = parseJson($ev.data)
