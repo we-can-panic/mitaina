@@ -55,13 +55,13 @@ input[type="password"] {
   background-color: #2980b9;
 }
 
-.player-column {
+.players-column {
   display: flex;
   align-items: center;
   margin: 10px;
 }
 
-.player-icon {
+.players-icon {
   border-radius: 50%;
   width: 3em;
   height: 3em;
@@ -75,7 +75,7 @@ input[type="password"] {
   z-index: 1;
 }
 
-.player-text {
+.players-text {
   margin-left: -1em;
   padding-left: 2em;
   padding-right: 1em;
@@ -112,10 +112,10 @@ input[type="password"] {
   background-color: #2980b9;
 }
 
-.is-me .player-icon {
+.is-me .players-icon {
   border: 12px solid #0c39ff;
 }
-.is-me .player-text {
+.is-me .players-text {
   border: 8px solid #0c39ff;
 }
 
@@ -329,7 +329,7 @@ input[type="password"] {
   background-color: #2980b9;
 }
 
-.result-player-point {
+.players-point {
   margin-left: auto;
   border-radius: 30%;
   width: 2.5em;
@@ -345,7 +345,7 @@ input[type="password"] {
 
 }
 
-.is-me .result-player-point{
+.is-me .players-point{
   border: 6px solid #0c39ff;
 }
 

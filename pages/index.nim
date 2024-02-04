@@ -3,14 +3,15 @@ import json, dom, strformat, sequtils
 import ../domain/models
 import lib/simpleWs
 
-const debug = false
+const debug = defined(debug) # -d:debug
 
 var
   players: seq[Player] = block:
-    when debug: @[Player(name: "AAAAAAAAAA"),Player(name: "BBBB", id: "bbbb", isAnswer: false)]
+    when debug: @[Player(name: "AAAAAAAAAA", id: "1", isAnswer: true),Player(name: "BBBB", id: "bbbb", isAnswer: false, point: 120)]
     else: @[]
   me: string = block:
-    when debug: "bbbb"
+    # when debug: "bbbb"
+    when debug: "1"
     else: ""
   board = block:
     when debug:
@@ -60,8 +61,13 @@ func find(answers: seq[Answer], id: string): int =
       return i
   return -1
 
+func isAnswer(players: seq[Player], id: string): bool =
+  let idx = players.find(id)
+  return players[idx].isAnswer
 
 #--
+
+func makePlayers(ps: seq[Player]): VNode 
 
 proc makeHeader(): VNode =
   buildHtml tdiv:
@@ -102,16 +108,7 @@ proc makeLogin(): VNode =
 
 proc makeWait(): VNode =
   buildHtml tdiv:
-    tdiv(id="wait-playerinfo", class="player-columns"):
-      for i, p in players:
-        tdiv(id=fmt"wait-playerinfo-{i}", class=block:
-          if me == p.id: "player-column is-me"
-          else: "player-column"
-          ):
-          tdiv(id=fmt"wait-playerinfo-{i}-icon", class="player-icon"):
-            text $p.name[0]
-          tdiv(id=fmt"wait-playerinfo-{i}-name", class="player-text"):
-            text p.name
+    makePlayers(players)
 
     tdiv(id="wait-start"):
       button(id="wait-start-button"):
@@ -146,11 +143,7 @@ proc makeThema(displayHidden=false): VNode =
 
 
 proc makeWriteA(): VNode =
-  let myplayer = block:
-    let idx = players.find(me)
-    players[idx]
-
-  if not myplayer.isAnswer:
+  if not players.isAnswer(me):
     return buildHtml tdiv(class="waiting"):
       text "waiting for answer..."
 
@@ -218,10 +211,7 @@ func makeOnClickDown(i: int): proc () =
   return onClick
 
 proc makeSortA(): VNode =
-  let myplayer = block:
-    let idx = players.find(me)
-    players[idx]
-  if myplayer.isAnswer:
+  if players.isAnswer(me):
     buildHtml tdiv:
       tdiv(id="sortA-Answer", class="columns"):
         for i, ansId in board.ansOrder:
@@ -248,12 +238,9 @@ proc makeSortA(): VNode =
 
 
 proc makeDisplayA(): VNode =
-  let myplayer = block:
-    let idx = players.find(me)
-    players[idx]
   buildHtml tdiv:
-    makeThema(myplayer.isAnswer) # answerであれば見せる
-    if myplayer.isAnswer:
+    makeThema(players.isAnswer(me)) # answerであれば見せる
+    if players.isAnswer(me):
       tdiv(class="displayA-open"):
         button(class=fmt"displayA-open-button button-{board.t1.hidden}"):
           text "1つめの単語を公開"
@@ -278,11 +265,11 @@ proc makeDisplayA(): VNode =
             text $i
           tdiv(id=fmt"displayA-Answer-{i}-name", class="column-inner"):
             text block:
-              if myplayer.isAnswer or not ans.hidden:
+              if players.isAnswer(me) or not ans.hidden:
                 ans.ans
               else:
                 ""
-          if myplayer.isAnswer:
+          if players.isAnswer(me):
             tdiv(id=fmt"displayA-Answer-{i}-button", class="column-inner"):
               let apear = block:
                 if not enableSatisfied and ans.hidden: # hiddenされている最初のcolのみ表示
@@ -300,15 +287,13 @@ proc makeDisplayA(): VNode =
 
 
 proc makePoint(): VNode =
-  let myplayer = block:
-    let idx = players.find(me)
-    players[idx]
   buildHtml tdiv:
     makeThema(true)
     tdiv(class="point-answer"):
-      tdiv(class="point-answer-label"):
-        tdiv(class="point-answer-label-text"):
-          text "評価する答え"
+      if not players.isAnswer(me): 
+        tdiv(class="point-answer-label"):
+          tdiv(class="point-answer-label-text"):
+            text "評価する答え"
       for i, ansId in board.ansOrder:
         let ans = board.ans.filterIt(it.id==ansId)[0]
         tdiv(id=fmt"point-answer-{i}", class="point-answer-column"):
@@ -316,12 +301,12 @@ proc makePoint(): VNode =
             text $i
           tdiv(id=fmt"point-answer-{i}-name", class="point-answer-text"):
             text ans.ans
-          if not myplayer.isAnswer:
+          if not players.isAnswer(me):
             if i==0:
               input(`type`="radio", id=fmt"point-answer-{i}-radio", name="point-answer-radio", class="point-answer-radio", checked="")
             else:
               input(`type`="radio", id=fmt"point-answer-{i}-radio", name="point-answer-radio", class="point-answer-radio")
-      if not myplayer.isAnswer:
+      if not players.isAnswer(me):
         button(class="point-dicision-button"):
           text "決定"
           proc onClick() =
@@ -339,21 +324,7 @@ proc makePoint(): VNode =
 
 proc makeResult(): VNode =
   buildHtml tdiv:
-    tdiv(id="result-player", class="player-columns"):
-      for i, p in players:
-        tdiv(id=fmt"result-player-{i}", class=block:
-          if me == p.id: "player-column is-me"
-          else:          "player-column"
-          ):
-          tdiv(id=fmt"result-player-{i}-icon", class="player-icon"):
-            text $p.name[0]
-          tdiv(id=fmt"result-player-{i}-name", class="player-text"):
-            text p.name
-          tdiv(class=block:
-                if me == p.id: "result-player-point is-me"
-                else:          "result-player-point"):
-            text $p.point 
-
+    makePlayers(players)
 
     tdiv(class="result-next"):
       button(id="result-next-button"):
@@ -364,6 +335,13 @@ proc makeResult(): VNode =
           }))
 
 
+func makePlayers(ps: seq[Player]): VNode =
+  buildHtml tdiv(id="players"):
+    for i, p in ps:
+      tdiv(class="players-column"):
+        tdiv(class="players-icon"): text $p.name[0]
+        tdiv(class="players-text"): text p.name
+        tdiv(class="players-point"): text $p.point 
 
 
 
@@ -375,6 +353,8 @@ proc main(): VNode =
       tdiv(class="debug-text"):
         text fmt"""
         state: {state}
+        me: {me}
+        isAnswer: {players.isAnswer(me)}
         """
 
     case state:
