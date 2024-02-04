@@ -7,7 +7,7 @@ const debug = defined(debug) # -d:debug
 
 var
   players: seq[Player] = block:
-    when debug: @[Player(name: "AAAAAAAAAA", id: "1", isAnswer: true),Player(name: "BBBB", id: "bbbb", isAnswer: false, point: 120)]
+    when debug: @[Player(name: "なAAAAAAAAAA", id: "1", isAnswer: true),Player(name: "BBBB", id: "bbbb", isAnswer: false, point: 120)]
     else: @[]
   me: string = block:
     # when debug: "bbbb"
@@ -30,7 +30,7 @@ var
       Board()
   # state: GameStatus = gsWait
   state: GameStatus = block:
-    when debug: gsSortA
+    when debug: gsWait
     else: gsLogin
 
 proc onRecv(ev: MessageEvent) =
@@ -340,7 +340,7 @@ func makePlayers(ps: seq[Player]): VNode =
   buildHtml tdiv(id="players"):
     for i, p in ps:
       tdiv(class="players-column"):
-        tdiv(class="players-icon"): text $p.name[0]
+        tdiv(class="players-icon"): text $i
         tdiv(class="players-text"): text p.name
         tdiv(class="players-point"): text $p.point 
 
