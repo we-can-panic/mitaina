@@ -16,13 +16,13 @@ var
   board = block:
     when debug:
       Board(
-        t1: Theme(word: "ガソリンスタンド", hidden: false),
-        t2: Theme(word: "図書館", hidden: false),
+        t1: Theme(word: "ガソリンスタンド", hidden: true),
+        t2: Theme(word: "図書館", hidden: true),
         ans: @[
-          Answer(ans: "司書さんの声が大きい", id: "1", hidden: false),
-          Answer(ans: "赤の本、黄色の本、緑の本から自分に合うものを選んで借りる", id: "2", hidden: false),
-          Answer(ans: "返却のときに、灰皿をきれいにしてくれる", id: "3", hidden: false),
-          Answer(ans: "ドライブスルー", id: "4", hidden: false),
+          Answer(ans: "司書さんの声が大きい", id: "1", hidden: true),
+          Answer(ans: "赤の本、黄色の本、緑の本から自分に合うものを選んで借りる", id: "2", hidden: true),
+          Answer(ans: "返却のときに、灰皿をきれいにしてくれる", id: "3", hidden: true),
+          Answer(ans: "ドライブスルー", id: "4", hidden: true),
         ],
         ansOrder: @["4", "3", "2", "1"]
       )
@@ -30,7 +30,7 @@ var
       Board()
   # state: GameStatus = gsWait
   state: GameStatus = block:
-    when debug: gsResult
+    when debug: gsDisplayA
     else: gsLogin
 
 proc onRecv(ev: MessageEvent) =
@@ -260,30 +260,23 @@ proc makeDisplayA(): VNode =
       var enableSatisfied = false
       for i, ansId in board.ansOrder:
         let ans = board.ans.filterIt(it.id==ansId)[0]
-        tdiv(id=fmt"displayA-Answer-{i}", class="column"):
-          tdiv(id=fmt"displayA-Answer-{i}-num", class="column-inner"):
+        tdiv(class="answer-column"):
+          tdiv(class="answer-icon"):
             text $i
-          tdiv(id=fmt"displayA-Answer-{i}-name", class="column-inner"):
+          tdiv(class="answer-text"):
             text block:
               if players.isAnswer(me) or not ans.hidden:
                 ans.ans
               else:
                 ""
-          if players.isAnswer(me):
-            tdiv(id=fmt"displayA-Answer-{i}-button", class="column-inner"):
-              let apear = block:
-                if not enableSatisfied and ans.hidden: # hiddenされている最初のcolのみ表示
-                  enableSatisfied = true
-                  true
-                else:
-                  false
-              if apear:
-                button():
-                  text "Open"
-                  proc onClick() =
-                    wsSend($(%* {
-                      "kind": acOpenAnswer
-                    }))
+          if players.isAnswer(me) and ans.hidden and not enableSatisfied: # hiddenされている最初のansのみ表示
+              button(class="answer-button"):
+                text "Open"
+                proc onClick() =
+                  wsSend($(%* {
+                    "kind": acOpenAnswer
+                  }))
+              enableSatisfied = true
 
 
 proc makePoint(): VNode =

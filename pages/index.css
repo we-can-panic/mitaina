@@ -243,6 +243,63 @@ input[type="password"] {
   font-weight: bold;
 }
 
+.answer-column {
+  display: flex;
+  align-items: center;
+  margin: 10px;
+}
+
+.answer-icon {
+  border-radius: 50%;
+  border: 4px solid #6fc4fc;
+
+  height: 2em;
+  width: 2em;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f9ff;
+  font-weight: bold;
+
+  z-index: 1;
+}
+
+.answer-text {
+  margin-left: -1em;
+  padding-left: 2em;
+  padding-right: 1em;
+  /* height: 2em;
+  font-size: 1.5em; */
+
+  border: 2px solid #6fc4fc;
+
+  display: flex;
+  align-items: center;
+  background-color: #f1f9ff;
+
+  z-index: 0;
+}
+
+.answer-button {
+  margin-left: auto;
+  border-radius: 30%;
+  height: 2.5em;
+  border: 4px solid #6fc4fc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f9ff;
+  font-weight: bold;
+  font-size: 1em;
+  z-index: 1;
+  cursor: pointer;
+}
+
+.answer-button:hover {
+  background-color: #6fc4fc;
+}
+
 .button-false {
   opacity: 0.5;
   border: gray;
