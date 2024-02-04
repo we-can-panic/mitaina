@@ -110,6 +110,9 @@ proc calc * (key: string, dataStr: string): seq[LogicResponce] =
         return @[LogicResponce(dst: sdAll, kind: asBoardUpdate, data: %board)]
     return @[LogicResponce(dst: sdAll, kind: asBoardUpdate, data: %board)]
 
+  of acWhiteFlag:
+    return @[LogicResponce(dst: sdAll, kind: asStatusUpdate, data: %gsPoint)]
+
   of acOpenT1:
     board.t1.hidden = false
     result = @[LogicResponce(dst: sdAll, kind: asBoardUpdate, data: %board)]
@@ -124,20 +127,44 @@ proc calc * (key: string, dataStr: string): seq[LogicResponce] =
 
   of acBestAnswer:
     let idx = data["idx"].getInt
-    if idx == -1:
+    if idx != -1: # 高評価の人に+30pt.
       let
         bestAnswerId = board.ansOrder[idx]
         bestPlayer = players.filterIt(bestAnswerId in it.ansId)[0]
         bestPlayerIdx = players.find(bestPlayer)
       if bestPlayerIdx != -1:
         players[bestPlayerIdx].point += 30
+      log(fmt"{bestPlayerIdx} += 30")
+    if board.t1.hidden == false and board.t2.hidden == false:
+      # 当てた人には枚数に応じてpt. を渡す
+      # 1枚で50pt, 2枚で40pt, 3枚で30pt, ...
+      let
+        notAnswerPlayerIdx = block:
+          var res = -1
+          for i, p in players:
+            if not p.isAnswer:
+              res = i
+              break
+          res
+        hitCount = board.ans.filterIt(it.hidden==false).len
+        getPoint = 50 - hitCount * 10
+      players[notAnswerPlayerIdx].point += getPoint
+      log(fmt"{notAnswerPlayerIdx} += 50 - {hitCount} * 10")
     return @[
       LogicResponce(dst: sdAll, kind: asPlayerUpdate, data: %players),
       LogicResponce(dst: sdAll, kind: asStatusUpdate, data: %gsResult)
     ]
 
   of acGameNext:
-    return @[LogicResponce(dst: sdAll, kind: asStatusUpdate, data: %gsWait)]   
+    board.ans = @[]
+    board.ansOrder = @[]
+    for i, _ in players:
+      players[i].ansId = @[]
+    return @[
+      LogicResponce(dst: sdAll, kind: asBoardUpdate, data: %board),
+      LogicResponce(dst: sdAll, kind: asPlayerUpdate, data: %players),
+      LogicResponce(dst: sdAll, kind: asStatusUpdate, data: %gsWait)
+    ]
 
 
 proc getAnswers * (): seq[Player] =

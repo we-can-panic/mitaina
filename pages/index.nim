@@ -10,19 +10,19 @@ var
     when debug: @[Player(name: "AAAAAAAAAA", id: "1", isAnswer: true),Player(name: "BBBB", id: "bbbb", isAnswer: false, point: 120)]
     else: @[]
   me: string = block:
-    # when debug: "bbbb"
-    when debug: "1"
+    when debug: "bbbb"
+    # when debug: "1"
     else: ""
   board = block:
     when debug:
       Board(
         t1: Theme(word: "ガソリンスタンド", hidden: true),
-        t2: Theme(word: "図書館", hidden: true),
+        t2: Theme(word: "図書館", hidden: false),
         ans: @[
           Answer(ans: "司書さんの声が大きい", id: "1", hidden: true),
           Answer(ans: "赤の本、黄色の本、緑の本から自分に合うものを選んで借りる", id: "2", hidden: true),
           Answer(ans: "返却のときに、灰皿をきれいにしてくれる", id: "3", hidden: true),
-          Answer(ans: "ドライブスルー", id: "4", hidden: true),
+          Answer(ans: "ドライブスルー", id: "4", hidden: false),
         ],
         ansOrder: @["4", "3", "2", "1"]
       )
@@ -30,7 +30,7 @@ var
       Board()
   # state: GameStatus = gsWait
   state: GameStatus = block:
-    when debug: gsDisplayA
+    when debug: gsPoint
     else: gsLogin
 
 proc onRecv(ev: MessageEvent) =
@@ -83,7 +83,7 @@ proc makeLogin(): VNode =
         input(id="login-parameter-name-input", `type`="text")
       tdiv(id="login-parameter-pass"):
         label:
-          text "passwprd"
+          text "password"
         input(id="login-parameter-pass-input", `type`="password")
     tdiv():
       button(id="login-button"):
@@ -277,6 +277,14 @@ proc makeDisplayA(): VNode =
                     "kind": acOpenAnswer
                   }))
               enableSatisfied = true
+      if not players.isAnswer(me) and board.ans.allIt(not it.hidden):
+        button(class="answer-button"):
+          text "降参"
+          proc onClick() =
+            wsSend($(%* {
+              "kind": acWhiteFlag
+            }))
+
 
 
 proc makePoint(): VNode =

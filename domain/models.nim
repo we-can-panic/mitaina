@@ -65,6 +65,7 @@ type
     acChangeAnsOrder # ansorderの変更
     acStartQuestion  # 回答開始
     acOpenAnswer     # 回答の開示
+    acWhiteFlag      # 降参
     acOpenT1         # お題の回答
     acOpenT2
     acBestAnswer     # 一番良い答えを決定
