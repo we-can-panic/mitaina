@@ -10,8 +10,8 @@ var
     when debug: @[Player(name: "AAAAAAAAAA", id: "1", isAnswer: true),Player(name: "BBBB", id: "bbbb", isAnswer: false, point: 120)]
     else: @[]
   me: string = block:
-    when debug: "bbbb"
-    # when debug: "1"
+    # when debug: "bbbb"
+    when debug: "1"
     else: ""
   board = block:
     when debug:
@@ -30,7 +30,7 @@ var
       Board()
   # state: GameStatus = gsWait
   state: GameStatus = block:
-    when debug: gsPoint
+    when debug: gsSortA
     else: gsLogin
 
 proc onRecv(ev: MessageEvent) =
@@ -215,18 +215,18 @@ proc makeSortA(): VNode =
     buildHtml tdiv:
       tdiv(id="sortA-Answer", class="columns"):
         for i, ansId in board.ansOrder:
-          tdiv(id=fmt"sortA-Answer-{i}", class="column"):
-            tdiv(id=fmt"sortA-Answer-{i}-num", class="column-inner"):
-              text $i
-            tdiv(id=fmt"sortA-Answer-{i}-name", class="column-inner"):
+          tdiv(class="answer-column"):
+            tdiv(class="answer-icon"):
+              text $(i+1)
+            tdiv(class="answer-text"):
               text board.ans.filterIt(it.id==ansId)[0].ans
-            tdiv(id=fmt"sortA-Answer-{i}-buttons", class="column-inner"):
+            tdiv(class="answer-button"):
               button(onClick = makeOnClickUp(i)):
                 text "△"
               button(onClick = makeOnClickDown(i)):
                 text "▽"
-      tdiv(id="sortA-decision"):
-        button(id="sortA-decision-button"):
+      tdiv():
+        button(class="answer-button"):
           text "OK"
           proc onClick() =
             wsSend($(%* {
